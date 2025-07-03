@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { setupStaticServing } from './static-serve.js';
+import { db } from './database/db.js';
 
 dotenv.config();
 
@@ -10,10 +11,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// example endpoint
-// app.get('/api/hello', (req: express.Request, res: express.Response) => {
-//   res.json({ message: 'Hello World!' });
-// });
+// Get all ingredients
+app.get('/api/ingredients', async (req: express.Request, res: express.Response) => {
+  try {
+    console.log('Fetching ingredients from database...');
+    const ingredients = await db.selectFrom('ingredients').selectAll().execute();
+    console.log('Found ingredients:', ingredients);
+    res.json(ingredients);
+  } catch (error) {
+    console.error('Error fetching ingredients:', error);
+    res.status(500).json({ error: 'Failed to fetch ingredients' });
+  }
+});
 
 // Export a function to start the server
 export async function startServer(port) {

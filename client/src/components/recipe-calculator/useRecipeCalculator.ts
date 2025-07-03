@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Ingredient } from './IngredientList';
+import { useIngredients, Ingredient } from '@/hooks/useIngredients';
 
 interface CalculatedIngredient {
   name: string;
@@ -8,26 +8,10 @@ interface CalculatedIngredient {
 }
 
 export function useRecipeCalculator() {
-  const [ingredients, setIngredients] = React.useState<Ingredient[]>([
-    { name: '', amount: 0, unit: '' }
-  ]);
-  const [originalServings, setOriginalServings] = React.useState<number>(4);
+  const { ingredients, loading, error } = useIngredients();
+  const [originalServings] = React.useState<number>(4); // Fixed value
   const [newServings, setNewServings] = React.useState<number>(6);
   const [calculatedIngredients, setCalculatedIngredients] = React.useState<CalculatedIngredient[]>([]);
-
-  const addIngredient = React.useCallback(() => {
-    setIngredients(prev => [...prev, { name: '', amount: 0, unit: '' }]);
-  }, []);
-
-  const removeIngredient = React.useCallback((index: number) => {
-    setIngredients(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  const updateIngredient = React.useCallback((index: number, field: keyof Ingredient, value: string | number) => {
-    setIngredients(prev => prev.map((ingredient, i) => 
-      i === index ? { ...ingredient, [field]: value } : ingredient
-    ));
-  }, []);
 
   const formatAmount = React.useCallback((amount: number): string => {
     if (amount === Math.floor(amount)) {
@@ -51,27 +35,30 @@ export function useRecipeCalculator() {
     
     const multiplier = newServings / originalServings;
     
-    const calculated = ingredients
-      .filter(ingredient => ingredient.name.trim() !== '' && ingredient.amount > 0)
-      .map(ingredient => ({
-        name: ingredient.name,
-        amount: formatAmount(ingredient.amount * multiplier),
-        unit: ingredient.unit
-      }));
+    const calculated = ingredients.map(ingredient => ({
+      name: ingredient.name,
+      amount: formatAmount(ingredient.amount * multiplier),
+      unit: ingredient.unit
+    }));
     
     setCalculatedIngredients(calculated);
   }, [ingredients, originalServings, newServings, formatAmount]);
+
+  // Auto-calculate when ingredients are loaded or servings change
+  React.useEffect(() => {
+    if (ingredients.length > 0) {
+      calculateRecipe();
+    }
+  }, [ingredients, newServings, calculateRecipe]);
 
   return {
     ingredients,
     originalServings,
     newServings,
     calculatedIngredients,
-    setOriginalServings,
+    loading,
+    error,
     setNewServings,
-    addIngredient,
-    removeIngredient,
-    updateIngredient,
     calculateRecipe
   };
 }

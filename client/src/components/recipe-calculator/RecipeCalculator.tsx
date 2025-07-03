@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus, Calculator } from 'lucide-react';
-import { IngredientList } from './IngredientList';
+import { Calculator, Users, ChefHat } from 'lucide-react';
 import { useRecipeCalculator } from './useRecipeCalculator';
 
 export function RecipeCalculator() {
@@ -13,20 +12,43 @@ export function RecipeCalculator() {
     originalServings,
     newServings,
     calculatedIngredients,
-    setOriginalServings,
+    loading,
+    error,
     setNewServings,
-    addIngredient,
-    removeIngredient,
-    updateIngredient,
     calculateRecipe
   } = useRecipeCalculator();
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Lade Zutaten...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center text-destructive">
+              <p>Fehler beim Laden der Zutaten: {error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
+            <Users className="h-5 w-5" />
             Portionen
           </CardTitle>
         </CardHeader>
@@ -36,10 +58,9 @@ export function RecipeCalculator() {
             <Input
               id="original-servings"
               type="number"
-              min="1"
               value={originalServings}
-              onChange={(e) => setOriginalServings(Number(e.target.value))}
-              className="mt-1"
+              disabled
+              className="mt-1 bg-muted"
             />
           </div>
           <div>
@@ -58,46 +79,37 @@ export function RecipeCalculator() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Zutaten</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ChefHat className="h-5 w-5" />
+            Original Zutaten (für {originalServings} Personen)
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <IngredientList
-            ingredients={ingredients}
-            onUpdateIngredient={updateIngredient}
-            onRemoveIngredient={removeIngredient}
-          />
-          <Button 
-            onClick={addIngredient}
-            className="w-full mt-4"
-            variant="outline"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Zutat hinzufügen
-          </Button>
+          <div className="space-y-2">
+            {ingredients.map((ingredient) => (
+              <div key={ingredient.id} className="flex justify-between items-center p-2 bg-muted rounded">
+                <span className="font-medium">{ingredient.name}</span>
+                <span>{ingredient.amount} {ingredient.unit}</span>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
-
-      <Button 
-        onClick={calculateRecipe}
-        className="w-full"
-        size="lg"
-      >
-        Rezept berechnen
-      </Button>
 
       {calculatedIngredients.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="h-5 w-5" />
               Berechnet für {newServings} {newServings === 1 ? 'Person' : 'Personen'}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {calculatedIngredients.map((ingredient, index) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-muted rounded">
-                  <span className="font-medium">{ingredient.name}</span>
-                  <span>{ingredient.amount} {ingredient.unit}</span>
+                <div key={index} className="flex justify-between items-center p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <span className="font-semibold text-primary">{ingredient.name}</span>
+                  <span className="font-bold text-primary">{ingredient.amount} {ingredient.unit}</span>
                 </div>
               ))}
             </div>
