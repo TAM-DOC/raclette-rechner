@@ -8,8 +8,7 @@ interface CalculatedIngredient {
 }
 
 export function useRecipeCalculator() {
-  const { ingredients, loading, error } = useIngredients();
-  const [originalServings] = React.useState<number>(4); // Fixed value
+  const { ingredients, originalServings, loading, error } = useIngredients();
   const [newServings, setNewServings] = React.useState<number>(6);
   const [calculatedIngredients, setCalculatedIngredients] = React.useState<CalculatedIngredient[]>([]);
 

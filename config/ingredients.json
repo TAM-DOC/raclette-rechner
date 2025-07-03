@@ -1,0 +1,41 @@
+{
+  "originalServings": 4,
+  "ingredients": [
+    {
+      "id": 1,
+      "name": "Raclette Käse",
+      "amount": 200,
+      "unit": "g"
+    },
+    {
+      "id": 2,
+      "name": "Kartoffeln",
+      "amount": 300,
+      "unit": "g"
+    },
+    {
+      "id": 3,
+      "name": "Cornichons",
+      "amount": 50,
+      "unit": "g"
+    },
+    {
+      "id": 4,
+      "name": "Silberzwiebeln",
+      "amount": 30,
+      "unit": "g"
+    },
+    {
+      "id": 5,
+      "name": "Schinken",
+      "amount": 100,
+      "unit": "g"
+    },
+    {
+      "id": 6,
+      "name": "Bündnerfleisch",
+      "amount": 80,
+      "unit": "g"
+    }
+  ]
+}

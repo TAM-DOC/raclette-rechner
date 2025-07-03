@@ -1,7 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 import { setupStaticServing } from './static-serve.js';
-import { db } from './database/db.js';
 
 dotenv.config();
 
@@ -11,16 +12,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Get all ingredients
+// Get all ingredients from config file
 app.get('/api/ingredients', async (req: express.Request, res: express.Response) => {
   try {
-    console.log('Fetching ingredients from database...');
-    const ingredients = await db.selectFrom('ingredients').selectAll().execute();
-    console.log('Found ingredients:', ingredients);
-    res.json(ingredients);
+    console.log('Loading ingredients from config file...');
+    const configPath = path.join(process.cwd(), 'config', 'ingredients.json');
+    const configData = fs.readFileSync(configPath, 'utf8');
+    const config = JSON.parse(configData);
+    console.log('Found ingredients:', config.ingredients);
+    res.json(config);
   } catch (error) {
-    console.error('Error fetching ingredients:', error);
-    res.status(500).json({ error: 'Failed to fetch ingredients' });
+    console.error('Error loading ingredients:', error);
+    res.status(500).json({ error: 'Failed to load ingredients' });
   }
 });
 
