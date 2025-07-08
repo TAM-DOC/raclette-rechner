@@ -30,18 +30,20 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8 text-center">Recipe Calculator</h1>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 className="text-4xl font-bold mb-8 text-center">Raclette-Rechner</h1>
         
-        <div className="grid gap-8 lg:grid-cols-4">
-          <div className="lg:col-span-1">
-            <ParticipantInput 
-              participants={participants}
-              onParticipantsChange={handleParticipantsChange}
-            />
+        <div className="space-y-8">
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              <ParticipantInput 
+                participants={participants}
+                onParticipantsChange={handleParticipantsChange}
+              />
+            </div>
           </div>
           
-          <div className="lg:col-span-3">
+          <div>
             {isLoading ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">Calculating ingredients...</p>
