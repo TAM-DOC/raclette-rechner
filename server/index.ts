@@ -30,15 +30,17 @@ app.get('/api/ingredients/:participants', (req, res) => {
       return;
     }
 
-    const ingredientsData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
+    const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
+    const originalServings = configData.originalServings;
+    const ingredients = configData.ingredients;
     
-    const calculatedIngredients = ingredientsData.map(ingredient => ({
+    const calculatedIngredients = ingredients.map(ingredient => ({
       name: ingredient.name,
-      amount: (ingredient.baseAmount * participants) / ingredient.servings,
+      amount: (ingredient.amount * participants) / originalServings,
       unit: ingredient.unit
     }));
 
-    console.log(`Calculated ingredients for ${participants} participants:`, calculatedIngredients);
+    console.log(`Calculated ingredients for ${participants} participants (original: ${originalServings}):`, calculatedIngredients);
     res.json(calculatedIngredients);
   } catch (error) {
     console.error('Error calculating ingredients:', error);
@@ -57,9 +59,9 @@ app.get('/api/ingredients', (req, res) => {
       return;
     }
 
-    const ingredientsData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
-    console.log('Base ingredients configuration:', ingredientsData);
-    res.json(ingredientsData);
+    const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
+    console.log('Base ingredients configuration:', configData);
+    res.json(configData);
   } catch (error) {
     console.error('Error reading ingredients:', error);
     res.status(500).json({ error: 'Failed to read ingredients' });
