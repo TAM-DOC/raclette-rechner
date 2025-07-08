@@ -18,10 +18,7 @@ export function IngredientList({ ingredients, participants }: IngredientListProp
   }
 
   const formatAmount = (amount: number) => {
-    if (amount % 1 === 0) {
-      return amount.toString();
-    }
-    return amount.toFixed(2);
+    return Math.ceil(amount).toString();
   };
 
   return (
