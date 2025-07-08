@@ -1,7 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 import { setupStaticServing } from './static-serve.js';
-import { db } from './database/database.js';
 
 dotenv.config();
 
@@ -11,54 +12,57 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Test database connection
-app.get('/api/test', async (req, res) => {
+// Get ingredients with calculated amounts for participants
+app.get('/api/ingredients/:participants', (req, res) => {
   try {
-    const ingredients = await db.selectFrom('ingredients').selectAll().execute();
-    console.log('Database test successful, ingredients:', ingredients);
-    res.json({ message: 'Database connection successful', ingredients });
-  } catch (error) {
-    console.error('Database test failed:', error);
-    res.status(500).json({ error: 'Database connection failed' });
-  }
-});
-
-// Get all ingredients
-app.get('/api/ingredients', async (req, res) => {
-  try {
-    const ingredients = await db.selectFrom('ingredients').selectAll().execute();
-    res.json(ingredients);
-  } catch (error) {
-    console.error('Error fetching ingredients:', error);
-    res.status(500).json({ error: 'Failed to fetch ingredients' });
-  }
-});
-
-// Add new ingredient
-app.post('/api/ingredients', async (req, res) => {
-  try {
-    const { name, amount, unit } = req.body;
+    const participants = parseInt(req.params.participants);
     
-    if (!name || !amount || !unit) {
-      res.status(400).json({ error: 'Name, amount, and unit are required' });
+    if (isNaN(participants) || participants <= 0) {
+      res.status(400).json({ error: 'Invalid number of participants' });
       return;
     }
 
-    const result = await db
-      .insertInto('ingredients')
-      .values({
-        name,
-        amount: parseFloat(amount),
-        unit
-      })
-      .returningAll()
-      .executeTakeFirst();
+    const dataDirectory = process.env.DATA_DIRECTORY || './data';
+    const ingredientsPath = path.join(dataDirectory, 'ingredients.json');
+    
+    if (!fs.existsSync(ingredientsPath)) {
+      res.status(404).json({ error: 'Ingredients configuration not found' });
+      return;
+    }
 
-    console.log('Added ingredient:', result);
-    res.json(result);
+    const ingredientsData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
+    
+    const calculatedIngredients = ingredientsData.map(ingredient => ({
+      name: ingredient.name,
+      amount: (ingredient.baseAmount * participants) / ingredient.servings,
+      unit: ingredient.unit
+    }));
+
+    console.log(`Calculated ingredients for ${participants} participants:`, calculatedIngredients);
+    res.json(calculatedIngredients);
   } catch (error) {
-    console.error('Error adding ingredient:', error);
-    res.status(500).json({ error: 'Failed to add ingredient' });
+    console.error('Error calculating ingredients:', error);
+    res.status(500).json({ error: 'Failed to calculate ingredients' });
+  }
+});
+
+// Get base ingredients configuration
+app.get('/api/ingredients', (req, res) => {
+  try {
+    const dataDirectory = process.env.DATA_DIRECTORY || './data';
+    const ingredientsPath = path.join(dataDirectory, 'ingredients.json');
+    
+    if (!fs.existsSync(ingredientsPath)) {
+      res.status(404).json({ error: 'Ingredients configuration not found' });
+      return;
+    }
+
+    const ingredientsData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
+    console.log('Base ingredients configuration:', ingredientsData);
+    res.json(ingredientsData);
+  } catch (error) {
+    console.error('Error reading ingredients:', error);
+    res.status(500).json({ error: 'Failed to read ingredients' });
   }
 });
 

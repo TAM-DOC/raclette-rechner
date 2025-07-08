@@ -1,31 +1,28 @@
 export interface Ingredient {
-  id: number;
   name: string;
   amount: number;
   unit: string;
-  created_at: string;
 }
 
-export async function fetchIngredients(): Promise<Ingredient[]> {
-  const response = await fetch('/api/ingredients');
+export interface BaseIngredient {
+  name: string;
+  baseAmount: number;
+  unit: string;
+  servings: number;
+}
+
+export async function fetchIngredientsForParticipants(participants: number): Promise<Ingredient[]> {
+  const response = await fetch(`/api/ingredients/${participants}`);
   if (!response.ok) {
     throw new Error('Failed to fetch ingredients');
   }
   return response.json();
 }
 
-export async function addIngredient(ingredient: Omit<Ingredient, 'id' | 'created_at'>): Promise<Ingredient> {
-  const response = await fetch('/api/ingredients', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(ingredient),
-  });
-  
+export async function fetchBaseIngredients(): Promise<BaseIngredient[]> {
+  const response = await fetch('/api/ingredients');
   if (!response.ok) {
-    throw new Error('Failed to add ingredient');
+    throw new Error('Failed to fetch base ingredients');
   }
-  
   return response.json();
 }
