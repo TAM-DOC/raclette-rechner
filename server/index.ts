@@ -71,13 +71,20 @@ app.get('/api/ingredients', (req, res) => {
 // Export a function to start the server
 export async function startServer(port) {
   try {
+    // Always setup static serving (for both dev and production)
     if (process.env.NODE_ENV === 'production') {
+      console.log('Setting up static file serving for production');
       setupStaticServing(app);
     }
     
-    app.listen(port, () => {
-      console.log(`API Server running on port ${port}`);
+    const server = app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`Data directory: ${process.env.DATA_DIRECTORY || './data'}`);
+      console.log(`Current working directory: ${process.cwd()}`);
     });
+    
+    return server;
   } catch (err) {
     console.error('Failed to start server:', err);
     process.exit(1);

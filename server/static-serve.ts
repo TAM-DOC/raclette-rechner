@@ -10,11 +10,23 @@ export function setupStaticServing(app: express.Application) {
   app.use(express.static(path.join(process.cwd(), 'public')));
 
   // For any other routes, serve the index.html file
-  app.get('/{*splat}', (req, res, next) => {
+  app.get('/*splat', (req, res, next) => {
     // Skip API routes
     if (req.path.startsWith('/api/')) {
       return next();
     }
-    res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+    
+    // Log the request for debugging
+    console.log('Serving index.html for path:', req.path);
+    
+    const indexPath = path.join(process.cwd(), 'public', 'index.html');
+    console.log('Index file path:', indexPath);
+    
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error serving index.html:', err);
+        res.status(500).send('Internal Server Error');
+      }
+    });
   });
 }
