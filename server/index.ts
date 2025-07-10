@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-import { setupStaticServing } from './static-serve.js';
 
 dotenv.config();
 
@@ -11,6 +10,34 @@ const app = express();
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Static files middleware - serve from dist/public in production
+if (process.env.NODE_ENV === 'production') {
+  console.log('Setting up static file serving for production');
+  const publicPath = path.join(process.cwd(), 'dist', 'public');
+  console.log('Public path:', publicPath);
+  
+  // Serve static files
+  app.use(express.static(publicPath));
+  
+  // Handle all non-API routes with index.html
+  app.get('/*splat', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    
+    console.log('Serving index.html for path:', req.path);
+    const indexPath = path.join(publicPath, 'index.html');
+    
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      console.error('index.html not found at:', indexPath);
+      res.status(404).send('App not found');
+    }
+  });
+}
 
 // Get ingredients with calculated amounts for participants
 app.get('/api/ingredients/:participants', (req, res) => {
@@ -71,12 +98,6 @@ app.get('/api/ingredients', (req, res) => {
 // Export a function to start the server
 export async function startServer(port) {
   try {
-    // Always setup static serving (for both dev and production)
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Setting up static file serving for production');
-      setupStaticServing(app);
-    }
-    
     const server = app.listen(port, () => {
       console.log(`Server running on port ${port}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
@@ -90,6 +111,9 @@ export async function startServer(port) {
     process.exit(1);
   }
 }
+
+// For Vercel, export the app directly
+export default app;
 
 // Start the server directly if this is the main module
 if (import.meta.url === `file://${process.argv[1]}`) {
