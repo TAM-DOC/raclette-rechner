@@ -9,7 +9,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static files middleware for production
-console.log('Setting up static file serving for Vercel');
 const publicPath = path.join(__dirname, '../dist/public');
 console.log('Public path:', publicPath);
 
@@ -25,20 +24,135 @@ app.get('/api/ingredients/:participants', (req, res) => {
       return res.status(400).json({ error: 'Invalid number of participants' });
     }
 
-    // For Vercel, use a relative path to the data directory
-    const dataDirectory = path.join(__dirname, '../data');
-    const ingredientsPath = path.join(dataDirectory, 'ingredients.json');
-    
-    console.log('Looking for ingredients at:', ingredientsPath);
-    
-    if (!fs.existsSync(ingredientsPath)) {
-      console.error('Ingredients file not found at:', ingredientsPath);
-      return res.status(404).json({ error: 'Ingredients configuration not found' });
-    }
+    // Hardcoded ingredients data for Vercel (since data directory access is limited)
+    const ingredientsData = {
+      "originalServings": 12,
+      "ingredients": [
+        {
+          "id": 1,
+          "name": "Schweinefilet",
+          "amount": 200,
+          "unit": "g"
+        },
+        {
+          "id": 2,
+          "name": "Rinderfilet",
+          "amount": 1000,
+          "unit": "g"
+        },
+        {
+          "id": 3,
+          "name": "Hühnerfilet",
+          "amount": 500,
+          "unit": "g"
+        },
+        {
+          "id": 4,
+          "name": "Putenfilet",
+          "amount": 800,
+          "unit": "g"
+        },
+        {
+          "id": 5,
+          "name": "Speckwürfel",
+          "amount": 2,
+          "unit": "Packungen"
+        },
+        {
+          "id": 6,
+          "name": "Speck",
+          "amount": 6,
+          "unit": "Packungen"
+        },
+        {
+          "id": 7,
+          "name": "Shrimps",
+          "amount": 2,
+          "unit": "Packungen"
+        },
+        {
+          "id": 8,
+          "name": "Raclette-Käse",
+          "amount": 7,
+          "unit": "Packungen"
+        },
+        {
+          "id": 9,
+          "name": "Bohnen",
+          "amount": 800,
+          "unit": "g"
+        },
+        {
+          "id": 10,
+          "name": "Brot",
+          "amount": 5,
+          "unit": "Stück"
+        },
+        {
+          "id": 11,
+          "name": "Erdäpfel",
+          "amount": 1500,
+          "unit": "g"
+        },
+        {
+          "id": 12,
+          "name": "Sauerrahm für Souce",
+          "amount": 4,
+          "unit": "Packungen"
+        },
+        {
+          "id": 13,
+          "name": "Joghurt für Souce",
+          "amount": 4,
+          "unit": "Packungen"
+        },
+        {
+          "id": 14,
+          "name": "Mais",
+          "amount": 2,
+          "unit": "Packungen"
+        },
+        {
+          "id": 15,
+          "name": "Österkron",
+          "amount": 1,
+          "unit": "Packungen"
+        },
+        {
+          "id": 16,
+          "name": "Steirerkäse",
+          "amount": 1,
+          "unit": "Packungen"
+        },
+        {
+          "id": 17,
+          "name": "Champignons",
+          "amount": 1,
+          "unit": "Packungen"
+        },
+        {
+          "id": 18,
+          "name": "Lauch",
+          "amount": 1,
+          "unit": "Stück"
+        },
+        {
+          "id": 19,
+          "name": "Zuccini",
+          "amount": 1,
+          "unit": "Stück"
+        },
+        {
+          "id": 20,
+          "name": "Paprika",
+          "amount": 1,
+          "unit": "Stück"
+        }
+      ]
+    };
 
-    const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
-    const originalServings = configData.originalServings;
-    const ingredients = configData.ingredients;
+    const originalServings = ingredientsData.originalServings;
+    const ingredients = ingredientsData.ingredients;
     
     const calculatedIngredients = ingredients.map(ingredient => ({
       name: ingredient.name,
@@ -56,16 +170,135 @@ app.get('/api/ingredients/:participants', (req, res) => {
 
 app.get('/api/ingredients', (req, res) => {
   try {
-    const dataDirectory = path.join(__dirname, '../data');
-    const ingredientsPath = path.join(dataDirectory, 'ingredients.json');
-    
-    if (!fs.existsSync(ingredientsPath)) {
-      return res.status(404).json({ error: 'Ingredients configuration not found' });
-    }
+    // Hardcoded ingredients data for Vercel
+    const ingredientsData = {
+      "originalServings": 12,
+      "ingredients": [
+        {
+          "id": 1,
+          "name": "Schweinefilet",
+          "amount": 200,
+          "unit": "g"
+        },
+        {
+          "id": 2,
+          "name": "Rinderfilet",
+          "amount": 1000,
+          "unit": "g"
+        },
+        {
+          "id": 3,
+          "name": "Hühnerfilet",
+          "amount": 500,
+          "unit": "g"
+        },
+        {
+          "id": 4,
+          "name": "Putenfilet",
+          "amount": 800,
+          "unit": "g"
+        },
+        {
+          "id": 5,
+          "name": "Speckwürfel",
+          "amount": 2,
+          "unit": "Packungen"
+        },
+        {
+          "id": 6,
+          "name": "Speck",
+          "amount": 6,
+          "unit": "Packungen"
+        },
+        {
+          "id": 7,
+          "name": "Shrimps",
+          "amount": 2,
+          "unit": "Packungen"
+        },
+        {
+          "id": 8,
+          "name": "Raclette-Käse",
+          "amount": 7,
+          "unit": "Packungen"
+        },
+        {
+          "id": 9,
+          "name": "Bohnen",
+          "amount": 800,
+          "unit": "g"
+        },
+        {
+          "id": 10,
+          "name": "Brot",
+          "amount": 5,
+          "unit": "Stück"
+        },
+        {
+          "id": 11,
+          "name": "Erdäpfel",
+          "amount": 1500,
+          "unit": "g"
+        },
+        {
+          "id": 12,
+          "name": "Sauerrahm für Souce",
+          "amount": 4,
+          "unit": "Packungen"
+        },
+        {
+          "id": 13,
+          "name": "Joghurt für Souce",
+          "amount": 4,
+          "unit": "Packungen"
+        },
+        {
+          "id": 14,
+          "name": "Mais",
+          "amount": 2,
+          "unit": "Packungen"
+        },
+        {
+          "id": 15,
+          "name": "Österkron",
+          "amount": 1,
+          "unit": "Packungen"
+        },
+        {
+          "id": 16,
+          "name": "Steirerkäse",
+          "amount": 1,
+          "unit": "Packungen"
+        },
+        {
+          "id": 17,
+          "name": "Champignons",
+          "amount": 1,
+          "unit": "Packungen"
+        },
+        {
+          "id": 18,
+          "name": "Lauch",
+          "amount": 1,
+          "unit": "Stück"
+        },
+        {
+          "id": 19,
+          "name": "Zuccini",
+          "amount": 1,
+          "unit": "Stück"
+        },
+        {
+          "id": 20,
+          "name": "Paprika",
+          "amount": 1,
+          "unit": "Stück"
+        }
+      ]
+    };
 
-    const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
-    console.log('Base ingredients configuration:', configData);
-    res.json(configData);
+    console.log('Base ingredients configuration:', ingredientsData);
+    res.json(ingredientsData);
   } catch (error) {
     console.error('Error reading ingredients:', error);
     res.status(500).json({ error: 'Failed to read ingredients' });
@@ -74,14 +307,35 @@ app.get('/api/ingredients', (req, res) => {
 
 // Handle all other routes with index.html
 app.get('*', (req, res) => {
-  console.log('Serving index.html for path:', req.path);
-  const indexPath = path.join(publicPath, 'index.html');
-  
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    console.error('index.html not found at:', indexPath);
-    res.status(404).send('App not found');
+  try {
+    console.log('Serving index.html for path:', req.path);
+    const indexPath = path.join(publicPath, 'index.html');
+    
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      console.error('index.html not found at:', indexPath);
+      // Send a basic HTML response if index.html is not found
+      res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Raclette-Rechner</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body>
+          <div id="root">
+            <h1>Raclette-Rechner</h1>
+            <p>Loading...</p>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+  } catch (error) {
+    console.error('Error serving index.html:', error);
+    res.status(500).send('Internal Server Error');
   }
 });
 
