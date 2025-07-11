@@ -1,10 +1,6 @@
-import express from 'express';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -26,8 +22,7 @@ app.get('/api/ingredients/:participants', (req, res) => {
     const participants = parseInt(req.params.participants);
     
     if (isNaN(participants) || participants <= 0) {
-      res.status(400).json({ error: 'Invalid number of participants' });
-      return;
+      return res.status(400).json({ error: 'Invalid number of participants' });
     }
 
     // For Vercel, use a relative path to the data directory
@@ -38,8 +33,7 @@ app.get('/api/ingredients/:participants', (req, res) => {
     
     if (!fs.existsSync(ingredientsPath)) {
       console.error('Ingredients file not found at:', ingredientsPath);
-      res.status(404).json({ error: 'Ingredients configuration not found' });
-      return;
+      return res.status(404).json({ error: 'Ingredients configuration not found' });
     }
 
     const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
@@ -66,8 +60,7 @@ app.get('/api/ingredients', (req, res) => {
     const ingredientsPath = path.join(dataDirectory, 'ingredients.json');
     
     if (!fs.existsSync(ingredientsPath)) {
-      res.status(404).json({ error: 'Ingredients configuration not found' });
-      return;
+      return res.status(404).json({ error: 'Ingredients configuration not found' });
     }
 
     const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
@@ -80,7 +73,7 @@ app.get('/api/ingredients', (req, res) => {
 });
 
 // Handle all other routes with index.html
-app.get('/*', (req, res) => {
+app.get('*', (req, res) => {
   console.log('Serving index.html for path:', req.path);
   const indexPath = path.join(publicPath, 'index.html');
   
@@ -92,4 +85,4 @@ app.get('/*', (req, res) => {
   }
 });
 
-export default app;
+module.exports = app;
