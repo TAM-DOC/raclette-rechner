@@ -1,6 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public",
-  "installCommand": "npm install",
-  "framework": null
+  "functions": {
+    "api/ingredients/index.js": {
+      "runtime": "nodejs20.x"
+    },
+    "api/ingredients/[participants].js": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }
