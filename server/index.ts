@@ -2,10 +2,14 @@ import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import { initializeDatabase, getDatabase } from './database.js';
 
 dotenv.config();
 
 const app = express();
+
+// Initialize database
+initializeDatabase();
 
 // Body parsing middleware
 app.use(express.json());
@@ -40,7 +44,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Get ingredients with calculated amounts for participants
-app.get('/api/ingredients/:participants', (req, res) => {
+app.get('/api/ingredients/:participants', async (req, res) => {
   try {
     const participants = parseInt(req.params.participants);
     
@@ -49,17 +53,12 @@ app.get('/api/ingredients/:participants', (req, res) => {
       return;
     }
 
-    const dataDirectory = process.env.DATA_DIRECTORY || './data';
-    const ingredientsPath = path.join(dataDirectory, 'ingredients.json');
+    const db = getDatabase();
+    const ingredients = await db.selectFrom('ingredients').selectAll().execute();
     
-    if (!fs.existsSync(ingredientsPath)) {
-      res.status(404).json({ error: 'Ingredients configuration not found' });
-      return;
-    }
-
-    const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
-    const originalServings = configData.originalServings;
-    const ingredients = configData.ingredients;
+    console.log(`Found ${ingredients.length} ingredients in database`);
+    
+    const originalServings = 12; // Base serving size
     
     const calculatedIngredients = ingredients.map(ingredient => ({
       name: ingredient.name,
@@ -76,17 +75,23 @@ app.get('/api/ingredients/:participants', (req, res) => {
 });
 
 // Get base ingredients configuration
-app.get('/api/ingredients', (req, res) => {
+app.get('/api/ingredients', async (req, res) => {
   try {
-    const dataDirectory = process.env.DATA_DIRECTORY || './data';
-    const ingredientsPath = path.join(dataDirectory, 'ingredients.json');
+    const db = getDatabase();
+    const ingredients = await db.selectFrom('ingredients').selectAll().execute();
     
-    if (!fs.existsSync(ingredientsPath)) {
-      res.status(404).json({ error: 'Ingredients configuration not found' });
-      return;
-    }
-
-    const configData = JSON.parse(fs.readFileSync(ingredientsPath, 'utf8'));
+    console.log(`Found ${ingredients.length} base ingredients in database`);
+    
+    const configData = {
+      originalServings: 12,
+      ingredients: ingredients.map(ingredient => ({
+        id: ingredient.id,
+        name: ingredient.name,
+        amount: ingredient.amount,
+        unit: ingredient.unit
+      }))
+    };
+    
     console.log('Base ingredients configuration:', configData);
     res.json(configData);
   } catch (error) {
