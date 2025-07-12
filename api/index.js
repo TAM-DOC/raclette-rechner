@@ -1,5 +1,8 @@
 // Simple static API for Vercel
 export default function handler(req, res) {
+  console.log('API handler called with URL:', req.url);
+  console.log('Request method:', req.method);
+  
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -12,7 +15,10 @@ export default function handler(req, res) {
 
   // Handle ingredient requests
   if (req.url.startsWith('/api/ingredients/')) {
-    const participants = parseInt(req.url.split('/')[3]);
+    const urlParts = req.url.split('/');
+    const participants = parseInt(urlParts[3]);
+    
+    console.log('Calculating ingredients for participants:', participants);
     
     if (isNaN(participants) || participants <= 0) {
       res.status(400).json({ error: 'Invalid number of participants' });
@@ -22,16 +28,19 @@ export default function handler(req, res) {
     const ingredientsData = getIngredientsData();
     const calculatedIngredients = calculateIngredients(ingredientsData, participants);
     
+    console.log('Returning calculated ingredients:', calculatedIngredients);
     res.json(calculatedIngredients);
     return;
   }
 
   if (req.url === '/api/ingredients') {
+    console.log('Returning base ingredients configuration');
     const ingredientsData = getIngredientsData();
     res.json(ingredientsData);
     return;
   }
 
+  console.log('Route not found for URL:', req.url);
   res.status(404).json({ error: 'Not found' });
 }
 
@@ -67,9 +76,14 @@ function calculateIngredients(data, participants) {
   const originalServings = data.originalServings;
   const ingredients = data.ingredients;
   
-  return ingredients.map(ingredient => ({
+  console.log(`Calculating for ${participants} participants, original servings: ${originalServings}`);
+  
+  const result = ingredients.map(ingredient => ({
     name: ingredient.name,
     amount: (ingredient.amount * participants) / originalServings,
     unit: ingredient.unit
   }));
+  
+  console.log('Calculation result:', result);
+  return result;
 }
