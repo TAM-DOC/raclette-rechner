@@ -31,7 +31,7 @@ function App() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-4xl font-bold mb-8 text-center">Raclette-Rechner</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center text-purple-700">Raclette-Rechner</h1>
         
         <div className="space-y-8">
           <div className="flex justify-center">
